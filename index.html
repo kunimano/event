@@ -2,8 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0, minimum-scale=.25, user-scalable=yes">
   <title i18n-content="title"></title>
+  <link rel="stylesheet" href="css/fontfaces.css">
   <link rel="stylesheet" href="css/main.css">
   <script src="js/moment.min.js" type="text/javascript"></script>
   <script src="js/countdown.min.js" type="text/javascript"></script>
@@ -20,13 +21,13 @@
 ">
   <div id="templateHook"></div>
   <template id="timer-template">
-    <div style="
-      position: fixed;
-      transform: translate(-50%, -50%);
-      font-size: min(5vw,5vh);
-      top: 15vh;
-      left: 50vw;
-    ">Nog even wachten..</div>
+    <div class="output" id="output">
+      <h1 class="cursor" style="
+        font-size: min(5vw,5vh);
+        font-weight: normal;
+      "></h1>
+      <p></p>
+    </div>
     <div class="flip-container digit text-nowrap font-digit" style="
       color: forestgreen;
       position: fixed;
@@ -49,36 +50,64 @@
         </div>
       </div>
     </div>
-    <div class="font-digit-text" style="
+    <div class="" style="
       position: fixed;
       transform: translate(-50%, -50%);
-      font-size: min(4vw,4vh);
+      font-size: min(3.5vw,3.5vh);
       top: 70vh;
       left: 50vw;
     ">13 MAART 2021 - 14:05</div>
   </template>
   <template id="goodies-template">
-    <div class="image" style="
+    <div class="output" id="output">
+      <h1 class="cursor" style="
+        font-size: min(5vw,5vh);
+        font-weight: normal;
+      "></h1>
+      <p></p>
+    </div>
+    <div onclick="zoomPicture()" style="
         position: fixed;
         transform: translate(-50%, -50%);
         top: 50vh;
         left: 50vw;
       ">
-      <img src="picture/thegoodies.jpg" style="
-        height: 100%;
-        max-height: 80vh;
-        width: 100%;
-        max-width: 80vw;
-      "/>
+      <img id="zoomable" src="picture/thegoodies.jpg" class="normal-pic"/>
     </div>
+    <audio controls autoplay loop hidden>
+        <source src="picture/Netsky Hybrid Minds - Let Me Hold You Lyrics.mp3" type="audio/mpeg">
+    </audio>
   </template>
   <script>
     var timerTemplate = $('#timer-template').html();
     hideTheGoodies();
+    window.onload = function(){
+      var cd = countdown(thenMoment);
+      var h = cd.days ? cd.days*24 + cd.hours : cd.hours;
+      var m = cd.minutes;
+      var s = cd.seconds;
+      if (cd.value > 0 || (h === 0 && m === 0 && s === 0)) {
+        setTimeout(typeWriter("Klik op ENTER."), 1*1000);
+      } else if (!(h === 0 && m === 0 && s < 20)) {
+        setTimeout(typeWriter("Nog even wachten.."), 10*1000);
+      }
+    };
+    document.addEventListener("keyup", function(event) {
+      if (event.keyCode === 13) {
+        viewTheGoodies();
+      }
+    });
+    function zoomPicture() {
+       $("#zoomable").toggleClass('zoomed-pic');
+    }
     function viewTheGoodies() {
-      var template = $('#goodies-template').html();
-      $('#templateHook').html(template);
-      $("body").css({"color": "black", "background-color": "white"});
+      var cd = countdown(thenMoment);
+      if (cd.value > 0) {
+        var template = $('#goodies-template').html();
+        $('#templateHook').html(template);
+        $("body").css({"color": "black", "background-color": "white"});
+        setTimeout(typeWriter("Wij zijn getrouwd!|Drink er eentje op."), 3*1000);
+      }
     }
     function hideTheGoodies() {
       $('#templateHook').html(timerTemplate);
@@ -88,7 +117,7 @@
       $(".flip-container").toggleClass('hover');
     }
     var nowMoment = moment();
-    var thenMoment = moment('2021-03-13T14:05');
+    var thenMoment = moment('2021-03-13T14:05');    
     var last = 0;
     (function timerLoop(now) {
       // each seconds call update the DOM
@@ -101,13 +130,75 @@
         $("#cdh").text(h ? h : "0");
         $("#cdm").text(("00" + m).slice(-2));
         $("#cds").text(("00" + s).slice(-2));
-        if (h === 0 && m === 0 && s === 0) {
+        if (cd.value > 0 || (h === 0 && m === 0 && s === 0)) {
           $(".flip-container").addClass('hover')
           return;
+        } else if (h === 0 && m === 0 && s === 6) {
+          typeWriterClear()
+        }
+        else if (h === 0 && m === 0 && s === 2) {
+          typeWriter("Klik op ENTER.")
         }
       }
       requestAnimationFrame(timerLoop);
     })();
+    function typeWriter(targetString) {
+      // values to keep track of the number of letters typed, which quote to use. etc. Don't change these values.
+      var i = 0,
+          a = 0,
+          isParagraph = false,
+          speedForward = 100, //Typing Speed
+          speedWait = 1000, // Wait between typing and backspacing
+          speedBetweenLines = 1000, //Wait between first and second lines
+          element = $("#output"),
+          eHeader = element.children("h1"), //Header element
+          eParagraph = element.children("p"); //Subheader element
+      eHeader.text('');
+      eParagraph.text('');
+      //Run the loop
+      innerTypeWriter(targetString);
+      function innerTypeWriter(aString) {
+        // If full string hasn't yet been typed out, continue typing
+        if (i < aString.length) {
+          // If character about to be typed is a pipe, switch to second line and continue.
+          if (aString.charAt(i) == "|") {
+            isParagraph = true;
+            eHeader.removeClass("cursor");
+            eParagraph.addClass("cursor");
+            i++;
+            setTimeout(function(){ innerTypeWriter(aString); }, speedBetweenLines);
+          // If character isn't a pipe, continue typing.
+          } else {
+            // Type header or subheader depending on whether pipe has been detected
+            if (!isParagraph) {
+              eHeader.text(eHeader.text() + aString.charAt(i));
+            } else {
+              eParagraph.text(eParagraph.text() + aString.charAt(i));
+            }
+            i++;
+            setTimeout(function(){ innerTypeWriter(aString); }, speedForward);
+          }
+        }
+      }
+    }
+    function typeWriterClear() {
+      var speedBackspace = 25, //Backspace Speed
+          element = $("#output"),
+          eHeader = element.children("h1"), //Header element
+          eParagraph = element.children("p"); //Subheader element
+      // If either the header or the paragraph still has text, continue backspacing
+      if (eHeader.text().length > 0 || eParagraph.text().length > 0) {
+        // If paragraph still has text, continue erasing, otherwise switch to the header.
+        if (eParagraph.text().length > 0) {
+          eParagraph.text(eParagraph.text().substring(0, eParagraph.text().length - 1));
+        } else if (eHeader.text().length > 0) {
+          eParagraph.removeClass("cursor");
+          eHeader.addClass("cursor");
+          eHeader.text(eHeader.text().substring(0, eHeader.text().length - 1));
+        }
+        setTimeout(function(){ typeWriterClear(); }, speedBackspace);
+      }
+    }
   </script>
 </body>
 </html>
