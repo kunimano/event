@@ -15,20 +15,24 @@ body {
 }
 
 .normal-pic {
-  height: 100%;
-  max-height: 80vh;
-  width: 100%;
-  max-width: 80vw;
+  height: auto;
+  max-height: 60vh;
+  width: auto;
+  max-width: 60vw;
   cursor: zoom-in;
 }
 
 .zoomed-pic {
   z-index: 10;
-  height: unset;
   max-height: unset;
-  width: unset;
   max-width: unset;
   cursor: zoom-out;
+}
+
+.zoomed-pic-wrapper {
+  top: 0 !important;
+  left: 0 !important;
+  transform: translate(0, 0) !important;
 }
 
 /***************/

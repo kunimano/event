@@ -66,8 +66,8 @@
       "></h1>
       <p></p>
     </div>
-    <div onclick="zoomPicture()" style="
-        position: fixed;
+    <div id="goodieswrapper" onclick="zoomPicture()" style="
+        position: absolute;
         transform: translate(-50%, -50%);
         top: 50vh;
         left: 50vw;
@@ -99,6 +99,7 @@
     });
     function zoomPicture() {
        $("#zoomable").toggleClass('zoomed-pic');
+       $("#goodieswrapper").toggleClass('zoomed-pic-wrapper');
     }
     function viewTheGoodies() {
       var cd = countdown(thenMoment);
