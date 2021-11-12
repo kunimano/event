@@ -89,14 +89,12 @@ body {
   max-height: 60vh;
   width: auto;
   max-width: 60vw;
-  cursor: zoom-in;
 }
 
 .zoomed-pic {
   z-index: 10;
   max-height: unset;
   max-width: unset;
-  cursor: zoom-out;
 }
 
 .zoomed-pic-wrapper {
